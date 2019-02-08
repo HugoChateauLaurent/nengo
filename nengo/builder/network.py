@@ -54,8 +54,8 @@ def build_network(model, network, progress=None):
         seed_network(network, seeds=model.seeds, seeded=model.seeded)
 
         if progress is not None:
+            # number of sub-objects, plus 1 to accont for this network
             progress.max_steps = len(network.all_objects) + 1
-            # ^ number of sub-objects, plus 1 to accont for this network
 
             def build_callback(obj):
                 if isinstance(obj, tuple(network.objects)):
@@ -176,18 +176,16 @@ def _set_seed(seeds, obj, rng):
 
     if obj in seeds:
         return  # do not overwrite an existing seed
-    elif hasattr(obj, "seed") and obj.seed is not None:
+    elif getattr(obj, "seed", None) is not None:
         seeds[obj] = obj.seed
     else:
         seeds[obj] = seed
 
 
 def _set_seeded(seeded, obj, parent=None):
-    if obj in seeded:
-        # do not overwrite an existing value, since this value says how the
-        # original seed was assigned (deterministically or randomly), and if we
-        # re-determine this, we might be wrong (e.g. if obj.seed has changed)
-        return
-    else:
+    # do not overwrite an existing value, since this value says how the
+    # original seed was assigned (deterministically or randomly), and if we
+    # re-determine this, we might be wrong (e.g. if obj.seed has changed)
+    if obj not in seeded:
         seeded[obj] = (getattr(obj, 'seed', None) is not None
                        or parent is not None and seeded[parent])
