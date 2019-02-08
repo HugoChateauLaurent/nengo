@@ -109,8 +109,8 @@ def build_network(model, network, progress=None):
     model.params[network] = None
 
 
-def seed_network(network, seeds=None, seeded=None, base_rng=np.random):
-    """Generate seeding dictionaries for all objects in a network.
+def seed_network(network, seeds, seeded, base_rng=np.random):
+    """Populate seeding dictionaries for all objects in a network.
 
     This includes all subnetworks.
 
@@ -118,27 +118,19 @@ def seed_network(network, seeds=None, seeded=None, base_rng=np.random):
     ----------
     network : Network
         The network containing all objects to set seeds for.
-    seeds : {object: int} (Default: None)
-        Pre-existing map from objects to seeds for those objects. If ``None``,
-        create a new (empty) seed dictionary. Will not be overwritten if
-        already set.
-    seeded : {object: bool} (Default: None)
+    seeds : {object: int}
+        Pre-existing map from objects to seeds for those objects.
+        Will be modified in-place, but entries will not be
+        overwritten if already set.
+    seeded : {object: bool}
         Pre-existing map from objects to a boolean indicating whether they
         have a fixed seed either themselves or from a parent network (True),
-        or whether the seed is randomly generated (False). Will not be
+        or whether the seed is randomly generated (False).
+        Will be modified in-place, but entries will not be
         overwritten if already set.
     base_rng : np.random.RandomState
         Random number generator to use to set the seeds.
-
-    Returns
-    -------
-    seeds, seeded : dicts
-        The filled ``seeds`` and ``seeded`` dictionaries, as described above.
     """
-    if seeds is None:
-        seeds = {}
-    if seeded is None:
-        seeded = {}
 
     # seed this base network
     _set_seed(seeds, network, base_rng)
@@ -146,8 +138,6 @@ def seed_network(network, seeds=None, seeded=None, base_rng=np.random):
 
     # seed all sub-objects
     _seed_network(network, seeds, seeded)
-
-    return seeds, seeded
 
 
 def _seed_network(network, seeds, seeded):
